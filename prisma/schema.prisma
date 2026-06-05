@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Cellar {
+  id         String      @id @default(cuid())
+  name       String
+  location   String?
+  createdAt  DateTime    @default(now())
+  stockItems StockItem[]
+}
+
+model Wine {
+  id          String      @id @default(cuid())
+  producer    String
+  name        String
+  vintage     Int?
+  region      String?
+  grape       String?
+  vivinoUrl   String?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  stockItems  StockItem[]
+  vivinoData  VivinoData?
+}
+
+model StockItem {
+  id            String   @id @default(cuid())
+  wineId        String
+  cellarId      String
+  quantity      Int      @default(1)
+  purchasePrice Decimal? @db.Decimal(10, 2)
+  binLocation   String?
+  drinkFrom     Int?
+  drinkUntil    Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  wine          Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
+  cellar        Cellar   @relation(fields: [cellarId], references: [id], onDelete: Cascade)
+}
+
+model VivinoData {
+  id          String   @id @default(cuid())
+  wineId      String   @unique
+  score       Decimal? @db.Decimal(4, 2)
+  reviewCount Int?
+  fetchedAt   DateTime @default(now())
+  wine        Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
+}
