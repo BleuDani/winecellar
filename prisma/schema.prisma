@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Cellar {
@@ -17,18 +16,19 @@ model Cellar {
 }
 
 model Wine {
-  id          String      @id @default(cuid())
-  producer    String
-  name        String
-  vintage     Int?
-  region      String?
-  grape       String?
+  id         String      @id @default(cuid())
+  producer   String
+  name       String
+  vintage    Int?
+  region     String?
+  grape      String?
   vivinoUrl   String?
   notes       String?
+  labelImage  String?
   createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  stockItems  StockItem[]
-  vivinoData  VivinoData?
+  updatedAt  DateTime    @updatedAt
+  stockItems StockItem[]
+  vivinoData VivinoData?
 }
 
 model StockItem {
@@ -36,7 +36,7 @@ model StockItem {
   wineId        String
   cellarId      String
   quantity      Int      @default(1)
-  purchasePrice Decimal? @db.Decimal(10, 2)
+  purchasePrice Float?
   binLocation   String?
   drinkFrom     Int?
   drinkUntil    Int?
@@ -49,7 +49,7 @@ model StockItem {
 model VivinoData {
   id          String   @id @default(cuid())
   wineId      String   @unique
-  score       Decimal? @db.Decimal(4, 2)
+  score       Float?
   reviewCount Int?
   fetchedAt   DateTime @default(now())
   wine        Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)

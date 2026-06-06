@@ -4,6 +4,7 @@ import { getCellar } from "@/actions/cellar.actions";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StockTable } from "@/components/stock-table";
+import { EditCellarDialog } from "@/components/edit-cellar-dialog";
 import { Plus } from "lucide-react";
 
 export default async function CellarDetailPage({
@@ -25,9 +26,12 @@ export default async function CellarDetailPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{cellar.name}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold tracking-tight">{cellar.name}</h1>
+            <EditCellarDialog cellar={cellar} />
+          </div>
           {cellar.location && (
-            <p className="text-sm text-stone-500 mt-1">{cellar.location}</p>
+            <p className="text-sm text-muted-foreground mt-1">{cellar.location}</p>
           )}
           <Badge variant="secondary" className="mt-2">
             {totalBottles} bottles
