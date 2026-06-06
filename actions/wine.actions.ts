@@ -2,8 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { createClient } from "@supabase/supabase-js";
 
 export async function getWines() {
   try {
@@ -102,20 +101,27 @@ export async function uploadWineLabel(wineId: string, formData: FormData) {
     const allowed = ["jpg", "jpeg", "png", "webp", "avif"];
     if (!allowed.includes(ext)) return { error: "Only jpg, png, webp or avif allowed" };
 
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true });
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     const filename = `${wineId}.${ext}`;
-    const filepath = path.join(uploadsDir, filename);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filepath, buffer);
+    const { error: uploadError } = await supabase.storage
+      .from("wine-labels")
+      .upload(filename, file, { upsert: true, contentType: file.type });
 
-    const labelImage = `/uploads/${filename}`;
-    await prisma.wine.update({ where: { id: wineId }, data: { labelImage } });
+    if (uploadError) return { data: null, error: "Failed to upload label image" };
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("wine-labels")
+      .getPublicUrl(filename);
+
+    await prisma.wine.update({ where: { id: wineId }, data: { labelImage: publicUrl } });
 
     revalidatePath("/wines");
     revalidatePath(`/wines/${wineId}`);
-    return { data: labelImage, error: null };
+    return { data: publicUrl, error: null };
   } catch {
     return { data: null, error: "Failed to upload label image" };
   }
