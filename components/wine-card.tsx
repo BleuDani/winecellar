@@ -9,14 +9,15 @@ type Wine = {
   name: string;
   vintage: number | null;
   region: string | null;
-  grape: string | null;
+  country: string | null;
+  grapes: { grape: { name: string } }[];
   labelImage: string | null;
   stockItems: { quantity: number }[];
   vivinoData: { score: unknown } | null;
 };
 
 export function WineCard({ wine }: { wine: Wine }) {
-  const totalBottles = wine.stockItems.reduce((s, i) => s + i.quantity, 0);
+  const totalBottles = wine.stockItems.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0);
 
   return (
     <Link href={`/wines/${wine.id}`}>
@@ -44,16 +45,21 @@ export function WineCard({ wine }: { wine: Wine }) {
               {wine.vintage}
             </Badge>
           )}
+          {wine.country && (
+            <Badge variant="outline" className="text-xs">
+              {wine.country}
+            </Badge>
+          )}
           {wine.region && (
             <Badge variant="outline" className="text-xs">
               {wine.region}
             </Badge>
           )}
-          {wine.grape && (
-            <Badge variant="secondary" className="text-xs">
-              {wine.grape}
+          {wine.grapes.map((wg) => (
+            <Badge key={wg.grape.name} variant="secondary" className="text-xs">
+              {wg.grape.name}
             </Badge>
-          )}
+          ))}
           <Badge variant="secondary" className="text-xs">
             {totalBottles} btl
           </Badge>

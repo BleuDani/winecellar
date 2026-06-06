@@ -21,7 +21,7 @@ model Wine {
   name       String
   vintage    Int?
   region     String?
-  grape      String?
+  country    String?
   vivinoUrl   String?
   notes       String?
   labelImage  String?
@@ -29,6 +29,23 @@ model Wine {
   updatedAt  DateTime    @updatedAt
   stockItems StockItem[]
   vivinoData VivinoData?
+  grapes     WineGrape[]
+}
+
+model Grape {
+  id        String      @id @default(cuid())
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  wines     WineGrape[]
+}
+
+model WineGrape {
+  wineId  String
+  grapeId String
+  wine    Wine  @relation(fields: [wineId], references: [id], onDelete: Cascade)
+  grape   Grape @relation(fields: [grapeId], references: [id], onDelete: Cascade)
+
+  @@id([wineId, grapeId])
 }
 
 model StockItem {

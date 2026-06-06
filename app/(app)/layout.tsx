@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { LayoutDashboard, Wine, Warehouse } from "lucide-react";
+import { LayoutDashboard, Wine, Warehouse, Grape } from "lucide-react";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/cellars", label: "Cellars", icon: Warehouse },
   { href: "/wines", label: "Wines", icon: Wine },
+  { href: "/grapes", label: "Grapes", icon: Grape },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

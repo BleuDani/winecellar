@@ -30,8 +30,11 @@ export default async function WineDetailPage({
           <h1 className="text-2xl font-semibold tracking-tight">{wine.name}</h1>
           <div className="flex gap-2 mt-2 flex-wrap">
             {wine.vintage && <Badge variant="outline">{wine.vintage}</Badge>}
+            {wine.country && <Badge variant="outline">{wine.country}</Badge>}
             {wine.region && <Badge variant="outline">{wine.region}</Badge>}
-            {wine.grape && <Badge variant="secondary">{wine.grape}</Badge>}
+            {wine.grapes?.map((wg) => (
+              <Badge key={wg.grape.id} variant="secondary">{wg.grape.name}</Badge>
+            ))}
             <Badge variant="secondary">{totalBottles} bottles in stock</Badge>
           </div>
         </div>

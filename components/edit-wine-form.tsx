@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { GrapeMultiSelect } from "@/components/grape-multi-select";
+
+type Grape = { id: string; name: string };
 
 type Wine = {
   id: string;
@@ -14,12 +17,19 @@ type Wine = {
   name: string;
   vintage: number | null;
   region: string | null;
-  grape: string | null;
+  country: string | null;
   vivinoUrl: string | null;
   notes: string | null;
+  grapes: { grape: Grape }[];
 };
 
-export function EditWineForm({ wine }: { wine: Wine }) {
+export function EditWineForm({
+  wine,
+  allGrapes,
+}: {
+  wine: Wine;
+  allGrapes: Grape[];
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -62,9 +72,16 @@ export function EditWineForm({ wine }: { wine: Wine }) {
           <Input id="region" name="region" placeholder="Burgundy" defaultValue={wine.region ?? ""} />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="grape">Grape</Label>
-          <Input id="grape" name="grape" placeholder="Pinot Noir" defaultValue={wine.grape ?? ""} />
+          <Label htmlFor="country">Country</Label>
+          <Input id="country" name="country" placeholder="France" defaultValue={wine.country ?? ""} />
         </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Grape Varieties</Label>
+        <GrapeMultiSelect
+          allGrapes={allGrapes}
+          selectedIds={wine.grapes.map((wg) => wg.grape.id)}
+        />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="vivinoUrl">Vivino URL</Label>

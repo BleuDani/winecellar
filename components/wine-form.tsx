@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { GrapeMultiSelect } from "@/components/grape-multi-select";
 
-export function WineForm() {
+type Grape = { id: string; name: string };
+
+export function WineForm({ allGrapes }: { allGrapes: Grape[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -42,9 +45,13 @@ export function WineForm() {
           <Input id="region" name="region" placeholder="Burgundy" />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="grape">Grape</Label>
-          <Input id="grape" name="grape" placeholder="Pinot Noir" />
+          <Label htmlFor="country">Country</Label>
+          <Input id="country" name="country" placeholder="France" />
         </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Grape Varieties</Label>
+        <GrapeMultiSelect allGrapes={allGrapes} />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="vivinoUrl">Vivino URL</Label>
