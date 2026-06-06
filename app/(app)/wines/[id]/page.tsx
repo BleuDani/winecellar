@@ -24,7 +24,7 @@ export default async function WineDetailPage({
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm text-muted-foreground">{wine.producer}</p>
           <h1 className="text-2xl font-semibold tracking-tight">{wine.name}</h1>

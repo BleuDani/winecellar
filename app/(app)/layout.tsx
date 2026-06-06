@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LayoutDashboard, Wine, Warehouse, Grape } from "lucide-react";
+import { BottomNav } from "@/components/bottom-nav";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -11,7 +12,8 @@ const nav = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen">
-      <aside className="w-56 shrink-0 border-r border-border bg-sidebar flex flex-col">
+      {/* Sidebar — desktop only */}
+      <aside className="hidden md:flex w-56 shrink-0 border-r border-border bg-sidebar flex-col">
         <div className="px-6 py-5 border-b border-border">
           <span className="font-semibold text-lg tracking-tight text-primary">
             🍷 Bleu's Wine Cellar
@@ -30,7 +32,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
       </aside>
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
+
+      {/* Main content — extra bottom padding on mobile for the tab bar */}
+      <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">
+        {children}
+      </main>
+
+      {/* Bottom tab bar — mobile only */}
+      <BottomNav />
     </div>
   );
 }

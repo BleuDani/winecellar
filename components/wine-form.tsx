@@ -25,7 +25,7 @@ export function WineForm({ allGrapes }: { allGrapes: Grape[] }) {
 
   return (
     <form action={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="producer">Producer *</Label>
           <Input id="producer" name="producer" required />
@@ -35,7 +35,7 @@ export function WineForm({ allGrapes }: { allGrapes: Grape[] }) {
           <Input id="name" name="name" required />
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="vintage">Vintage</Label>
           <Input id="vintage" name="vintage" type="number" placeholder="2021" />

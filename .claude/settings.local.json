@@ -25,7 +25,11 @@
       "Bash(cp \"/Applications/Microsoft Word.app/Contents/Resources/DFonts/Aptos-Italic.ttf\" /Users/danielabinatti/claudecode/winecellar/public/fonts/)",
       "Bash(cp \"/Applications/Microsoft Word.app/Contents/Resources/DFonts/Aptos-SemiBold.ttf\" /Users/danielabinatti/claudecode/winecellar/public/fonts/)",
       "Bash(cp \"/Applications/Microsoft Word.app/Contents/Resources/DFonts/Aptos-SemiBold-Italic.ttf\" /Users/danielabinatti/claudecode/winecellar/public/fonts/)",
-      "Bash(cp \"/Applications/Microsoft Word.app/Contents/Resources/DFonts/Aptos-Bold.ttf\" /Users/danielabinatti/claudecode/winecellar/public/fonts/)"
+      "Bash(cp \"/Applications/Microsoft Word.app/Contents/Resources/DFonts/Aptos-Bold.ttf\" /Users/danielabinatti/claudecode/winecellar/public/fonts/)",
+      "Bash(curl *)",
+      "Bash(vercel login *)",
+      "Bash(vercel link *)",
+      "Bash(vercel *)"
     ]
   }
 }

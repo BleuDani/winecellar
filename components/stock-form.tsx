@@ -74,7 +74,7 @@ export function StockForm({
         </Select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="quantity">Quantity</Label>
           <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} />
@@ -90,7 +90,7 @@ export function StockForm({
         <Input id="binLocation" name="binLocation" placeholder="e.g. Row 3, Shelf 2" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="drinkFrom">Drink From (year)</Label>
           <Input id="drinkFrom" name="drinkFrom" type="number" placeholder="2025" />

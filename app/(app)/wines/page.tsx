@@ -9,7 +9,7 @@ export default async function WinesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Wine Catalog</h1>
           <p className="text-sm text-stone-500 mt-1">
@@ -23,7 +23,7 @@ export default async function WinesPage() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {wines?.map((wine) => (
           <WineCard key={wine.id} wine={wine} />
         ))}
