@@ -34,7 +34,7 @@ export default async function CellarsPage() {
                   )}
                 </CardHeader>
                 <CardContent className="flex items-center gap-2">
-                  <Badge variant="secondary">{bottles} bottles</Badge>
+                  <Badge variant="secondary">{bottles} {bottles === 1 ? "bottle" : "bottles"}</Badge>
                   <Badge variant="outline">{cellar._count.stockItems} entries</Badge>
                 </CardContent>
               </Card>

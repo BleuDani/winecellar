@@ -116,7 +116,7 @@ export default async function DashboardPage() {
                     )}
                   </CardHeader>
                   <CardContent>
-                    <Badge variant="secondary">{bottles} bottles</Badge>
+                    <Badge variant="secondary">{bottles} {bottles === 1 ? "bottle" : "bottles"}</Badge>
                   </CardContent>
                 </Card>
               </Link>

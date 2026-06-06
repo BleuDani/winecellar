@@ -34,7 +34,7 @@ export default async function CellarDetailPage({
             <p className="text-sm text-muted-foreground mt-1">{cellar.location}</p>
           )}
           <Badge variant="secondary" className="mt-2">
-            {totalBottles} bottles
+            {totalBottles} {totalBottles === 1 ? "bottle" : "bottles"}
           </Badge>
         </div>
         <Link href={`/stock/new?cellarId=${id}`} className={buttonVariants()}>

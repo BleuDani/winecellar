@@ -35,7 +35,7 @@ export default async function WineDetailPage({
             {wine.grapes?.map((wg) => (
               <Badge key={wg.grape.id} variant="secondary">{wg.grape.name}</Badge>
             ))}
-            <Badge variant="secondary">{totalBottles} bottles in stock</Badge>
+            <Badge variant="secondary">{totalBottles} {totalBottles === 1 ? "bottle" : "bottles"} in stock</Badge>
           </div>
         </div>
         <div className="flex gap-2">
