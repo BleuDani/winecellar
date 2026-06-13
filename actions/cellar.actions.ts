@@ -2,10 +2,20 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+
+async function getUserId() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.id ?? null;
+}
 
 export async function getCellars() {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.cellar.findMany({
+      where: { userId },
       orderBy: { name: "asc" },
       include: {
         _count: { select: { stockItems: true } },
@@ -13,15 +23,17 @@ export async function getCellars() {
       },
     });
     return { data, error: null };
-  } catch (error) {
+  } catch {
     return { data: null, error: "Failed to fetch cellars" };
   }
 }
 
 export async function getCellar(id: string) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.cellar.findUnique({
-      where: { id },
+      where: { id, userId },
       include: {
         stockItems: {
           include: { wine: { include: { vivinoData: true } } },
@@ -30,30 +42,35 @@ export async function getCellar(id: string) {
       },
     });
     return { data, error: null };
-  } catch (error) {
+  } catch {
     return { data: null, error: "Failed to fetch cellar" };
   }
 }
 
 export async function createCellar(formData: FormData) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.cellar.create({
       data: {
+        userId,
         name: formData.get("name") as string,
         location: (formData.get("location") as string) || null,
       },
     });
     revalidatePath("/cellars");
     return { data, error: null };
-  } catch (error) {
+  } catch {
     return { data: null, error: "Failed to create cellar" };
   }
 }
 
 export async function updateCellar(id: string, formData: FormData) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.cellar.update({
-      where: { id },
+      where: { id, userId },
       data: {
         name: formData.get("name") as string,
         location: (formData.get("location") as string) || null,
@@ -62,17 +79,19 @@ export async function updateCellar(id: string, formData: FormData) {
     revalidatePath("/cellars");
     revalidatePath(`/cellars/${id}`);
     return { data, error: null };
-  } catch (error) {
+  } catch {
     return { data: null, error: "Failed to update cellar" };
   }
 }
 
 export async function deleteCellar(id: string) {
+  const userId = await getUserId();
+  if (!userId) return { error: "Unauthorized" };
   try {
-    await prisma.cellar.delete({ where: { id } });
+    await prisma.cellar.delete({ where: { id, userId } });
     revalidatePath("/cellars");
     return { error: null };
-  } catch (error) {
+  } catch {
     return { error: "Failed to delete cellar" };
   }
 }

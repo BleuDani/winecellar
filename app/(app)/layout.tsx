@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { LayoutDashboard, Wine, Warehouse, Grape } from "lucide-react";
+import { LayoutDashboard, Wine, Warehouse, Grape, LogOut } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
+import { createClient } from "@/lib/supabase/server";
+import { signOut } from "@/actions/auth.actions";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -9,7 +11,10 @@ const nav = [
   { href: "/grapes", label: "Grapes", icon: Grape },
 ];
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="flex h-screen">
       {/* Sidebar — desktop only */}
@@ -31,6 +36,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           ))}
         </nav>
+        <div className="px-3 py-4 border-t border-border">
+          <p className="text-xs text-muted-foreground px-3 mb-2 truncate">{user?.email}</p>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-primary transition-colors w-full"
+            >
+              <LogOut size={16} />
+              Sign out
+            </button>
+          </form>
+        </div>
       </aside>
 
       {/* Main content — extra bottom padding on mobile for the tab bar */}

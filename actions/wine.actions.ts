@@ -2,11 +2,21 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@supabase/supabase-js";
+import { createClient as createStorageClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
+
+async function getUserId() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.id ?? null;
+}
 
 export async function getWines() {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.wine.findMany({
+      where: { userId },
       orderBy: [{ producer: "asc" }, { name: "asc" }],
       include: {
         vivinoData: true,
@@ -21,9 +31,11 @@ export async function getWines() {
 }
 
 export async function getWine(id: string) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.wine.findUnique({
-      where: { id },
+      where: { id, userId },
       include: {
         vivinoData: true,
         grapes: { include: { grape: true } },
@@ -40,11 +52,14 @@ export async function getWine(id: string) {
 }
 
 export async function createWine(formData: FormData) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const vintage = formData.get("vintage") as string;
     const grapeIds = formData.getAll("grapeId") as string[];
     const data = await prisma.wine.create({
       data: {
+        userId,
         producer: formData.get("producer") as string,
         name: formData.get("name") as string,
         vintage: vintage ? parseInt(vintage) : null,
@@ -65,11 +80,13 @@ export async function createWine(formData: FormData) {
 }
 
 export async function updateWine(id: string, formData: FormData) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const vintage = formData.get("vintage") as string;
     const grapeIds = formData.getAll("grapeId") as string[];
     const data = await prisma.wine.update({
-      where: { id },
+      where: { id, userId },
       data: {
         producer: formData.get("producer") as string,
         name: formData.get("name") as string,
@@ -93,6 +110,8 @@ export async function updateWine(id: string, formData: FormData) {
 }
 
 export async function uploadWineLabel(wineId: string, formData: FormData) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const file = formData.get("labelImage") as File;
     if (!file || file.size === 0) return { error: "No file provided" };
@@ -101,7 +120,11 @@ export async function uploadWineLabel(wineId: string, formData: FormData) {
     const allowed = ["jpg", "jpeg", "png", "webp", "avif"];
     if (!allowed.includes(ext)) return { error: "Only jpg, png, webp or avif allowed" };
 
-    const supabase = createClient(
+    // Verify the wine belongs to the current user
+    const wine = await prisma.wine.findUnique({ where: { id: wineId, userId } });
+    if (!wine) return { data: null, error: "Wine not found" };
+
+    const supabase = createStorageClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
@@ -128,8 +151,10 @@ export async function uploadWineLabel(wineId: string, formData: FormData) {
 }
 
 export async function deleteWine(id: string) {
+  const userId = await getUserId();
+  if (!userId) return { error: "Unauthorized" };
   try {
-    await prisma.wine.delete({ where: { id } });
+    await prisma.wine.delete({ where: { id, userId } });
     revalidatePath("/wines");
     return { error: null };
   } catch {
@@ -138,8 +163,11 @@ export async function deleteWine(id: string) {
 }
 
 export async function getWinesByGrape() {
+  const userId = await getUserId();
+  if (!userId) return [];
   try {
     const rows = await prisma.wineGrape.findMany({
+      where: { wine: { userId } },
       include: { grape: { select: { name: true } } },
     });
     const counts: Record<string, number> = {};
@@ -155,9 +183,11 @@ export async function getWinesByGrape() {
 }
 
 export async function getWinesByCountry() {
+  const userId = await getUserId();
+  if (!userId) return [];
   try {
     const wines = await prisma.wine.findMany({
-      where: { country: { not: null } },
+      where: { userId, country: { not: null } },
       select: { country: true },
     });
     const counts: Record<string, number> = {};

@@ -10,6 +10,7 @@ datasource db {
 
 model Cellar {
   id         String      @id @default(cuid())
+  userId     String      @default("")
   name       String
   location   String?
   createdAt  DateTime    @default(now())
@@ -18,6 +19,7 @@ model Cellar {
 
 model Wine {
   id         String      @id @default(cuid())
+  userId     String      @default("")
   producer   String
   name       String
   vintage    Int?
@@ -65,10 +67,13 @@ model StockItem {
 }
 
 model VivinoData {
-  id          String   @id @default(cuid())
-  wineId      String   @unique
-  score       Float?
-  reviewCount Int?
-  fetchedAt   DateTime @default(now())
-  wine        Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  wineId       String   @unique
+  score        Float?
+  reviewCount  Int?
+  wineStyle    String?
+  foodPairings String?
+  description  String?
+  fetchedAt    DateTime @default(now())
+  wine         Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
 }

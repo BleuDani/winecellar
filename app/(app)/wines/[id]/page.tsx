@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StockTable } from "@/components/stock-table";
-import { EnrichButton } from "@/components/enrich-button";
+import { VivinoAgentButton } from "@/components/vivino-agent-button";
 import { LabelImageUpload } from "@/components/label-image-upload";
 import { Pencil, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,10 @@ export default async function WineDetailPage({
   if (!wine) return notFound();
 
   const totalBottles = wine.stockItems.reduce((s, i) => s + i.quantity, 0);
+  const vd = wine.vivinoData;
+  const foodPairings: string[] = vd?.foodPairings
+    ? (JSON.parse(vd.foodPairings) as string[])
+    : [];
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -68,29 +72,45 @@ export default async function WineDetailPage({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-base">Vivino Data</CardTitle>
-          <EnrichButton wineId={id} hasVivinoUrl={!!wine.vivinoUrl} />
+          <VivinoAgentButton wineId={id} />
         </CardHeader>
         <CardContent>
-          {wine.vivinoData ? (
-            <div className="flex gap-6">
-              <div>
-                <p className="text-3xl font-bold">
-                  {wine.vivinoData.score?.toString() ?? "—"}
-                </p>
-                <p className="text-xs text-muted-foreground">score</p>
+          {vd ? (
+            <div className="space-y-4">
+              <div className="flex gap-6">
+                <div>
+                  <p className="text-3xl font-bold">{vd.score?.toString() ?? "—"}</p>
+                  <p className="text-xs text-muted-foreground">score</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold">{vd.reviewCount?.toLocaleString() ?? "—"}</p>
+                  <p className="text-xs text-muted-foreground">reviews</p>
+                </div>
+                {vd.wineStyle && (
+                  <div>
+                    <Badge variant="secondary" className="mt-1">{vd.wineStyle}</Badge>
+                    <p className="text-xs text-muted-foreground mt-1">style</p>
+                  </div>
+                )}
               </div>
-              <div>
-                <p className="text-3xl font-bold">
-                  {wine.vivinoData.reviewCount?.toLocaleString() ?? "—"}
-                </p>
-                <p className="text-xs text-muted-foreground">reviews</p>
-              </div>
+              {foodPairings.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Pairs with</p>
+                  <div className="flex flex-wrap gap-1">
+                    {foodPairings.map((f) => (
+                      <Badge key={f} variant="outline" className="text-xs">{f}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {vd.description && (
+                <p className="text-sm text-muted-foreground leading-relaxed">{vd.description}</p>
+              )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              {wine.vivinoUrl
-                ? "No data fetched yet. Click Enrich to fetch."
-                : "Add a Vivino URL to enable enrichment."}
+              Click &quot;Enrich with AI&quot; to fetch Vivino data — the agent will find the URL
+              automatically if not set.
             </p>
           )}
         </CardContent>
