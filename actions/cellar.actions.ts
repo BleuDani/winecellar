@@ -15,7 +15,7 @@ export async function getCellars() {
   if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.cellar.findMany({
-      where: { userId },
+      where: { OR: [{ userId }, { userId: "" }] },
       orderBy: { name: "asc" },
       include: {
         _count: { select: { stockItems: true } },
@@ -33,7 +33,7 @@ export async function getCellar(id: string) {
   if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.cellar.findUnique({
-      where: { id, userId },
+      where: { id },
       include: {
         stockItems: {
           include: { wine: { include: { vivinoData: true } } },

@@ -11,8 +11,9 @@ async function getUserId() {
 }
 
 async function verifyCellarOwnership(cellarId: string, userId: string) {
-  const cellar = await prisma.cellar.findUnique({ where: { id: cellarId, userId } });
-  return cellar !== null;
+  const cellar = await prisma.cellar.findUnique({ where: { id: cellarId } });
+  // Allow shared cellars (userId="") and user-owned cellars
+  return cellar !== null && (cellar.userId === userId || cellar.userId === "");
 }
 
 export async function createStockItem(formData: FormData) {

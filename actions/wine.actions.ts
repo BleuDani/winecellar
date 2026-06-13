@@ -16,7 +16,7 @@ export async function getWines() {
   if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.wine.findMany({
-      where: { userId },
+      where: { OR: [{ userId }, { userId: "" }] },
       orderBy: [{ producer: "asc" }, { name: "asc" }],
       include: {
         vivinoData: true,
@@ -35,7 +35,7 @@ export async function getWine(id: string) {
   if (!userId) return { data: null, error: "Unauthorized" };
   try {
     const data = await prisma.wine.findUnique({
-      where: { id, userId },
+      where: { id },
       include: {
         vivinoData: true,
         grapes: { include: { grape: true } },
@@ -167,7 +167,7 @@ export async function getWinesByGrape() {
   if (!userId) return [];
   try {
     const rows = await prisma.wineGrape.findMany({
-      where: { wine: { userId } },
+      where: { wine: { OR: [{ userId }, { userId: "" }] } },
       include: { grape: { select: { name: true } } },
     });
     const counts: Record<string, number> = {};
@@ -187,7 +187,7 @@ export async function getWinesByCountry() {
   if (!userId) return [];
   try {
     const wines = await prisma.wine.findMany({
-      where: { userId, country: { not: null } },
+      where: { OR: [{ userId }, { userId: "" }], country: { not: null } },
       select: { country: true },
     });
     const counts: Record<string, number> = {};
