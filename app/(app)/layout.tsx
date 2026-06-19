@@ -37,7 +37,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
         <div className="px-3 py-4 border-t border-border">
-          <p className="text-xs text-muted-foreground px-3 mb-2 truncate">{user?.email}</p>
+          <Link
+            href="/account"
+            className="block text-xs text-muted-foreground px-3 mb-2 truncate hover:text-primary transition-colors"
+          >
+            {user?.email}
+          </Link>
           <form action={signOut}>
             <button
               type="submit"
