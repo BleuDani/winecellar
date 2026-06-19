@@ -32,6 +32,17 @@ export async function signOut() {
   redirect("/login");
 }
 
+export async function updateProfile(formData: FormData) {
+  const fullName = (formData.get("fullName") as string) || null;
+  const nickname = (formData.get("nickname") as string) || null;
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({
+    data: { full_name: fullName, nickname },
+  });
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
 export async function changePassword(formData: FormData) {
   const password = formData.get("password") as string;
   const confirm = formData.get("confirmPassword") as string;

@@ -3,6 +3,7 @@ import { signOut } from "@/actions/auth.actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChangePasswordForm } from "@/components/change-password-form";
+import { ProfileForm } from "@/components/profile-form";
 import { LogOut } from "lucide-react";
 
 export default async function AccountPage() {
@@ -46,6 +47,18 @@ export default async function AccountPage() {
               Sign out
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ProfileForm
+            defaultFullName={user?.user_metadata?.full_name ?? ""}
+            defaultNickname={user?.user_metadata?.nickname ?? ""}
+          />
         </CardContent>
       </Card>
 

@@ -14,6 +14,8 @@ const nav = [
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const nickname = user?.user_metadata?.nickname as string | undefined;
+  const cellarTitle = nickname ? `${nickname}'s Wine Cellar` : "Wine Cellar";
 
   return (
     <div className="flex h-screen">
@@ -21,7 +23,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <aside className="hidden md:flex w-56 shrink-0 border-r border-border bg-sidebar flex-col">
         <div className="px-6 py-5 border-b border-border">
           <span className="font-semibold text-lg tracking-tight text-primary">
-            🍷 Bleu's Wine Cellar
+            🍷 {cellarTitle}
           </span>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">

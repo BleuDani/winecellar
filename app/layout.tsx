@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
 
 const aptos = localFont({
@@ -15,10 +16,16 @@ const aptos = localFont({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Bleu's Wine Cellar",
-  description: "Bleu's personal wine cellar management",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const nickname = user?.user_metadata?.nickname as string | undefined;
+  const title = nickname ? `${nickname}'s Wine Cellar` : "Wine Cellar";
+  return {
+    title,
+    description: `${title} — personal wine cellar management`,
+  };
+}
 
 export default function RootLayout({
   children,
