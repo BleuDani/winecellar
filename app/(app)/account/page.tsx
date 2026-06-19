@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/actions/auth.actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChangePasswordForm } from "@/components/change-password-form";
 import { LogOut } from "lucide-react";
 
 export default async function AccountPage() {
@@ -45,6 +46,15 @@ export default async function AccountPage() {
               Sign out
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Change Password</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ChangePasswordForm />
         </CardContent>
       </Card>
     </div>

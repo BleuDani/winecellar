@@ -31,3 +31,14 @@ export async function signOut() {
   await supabase.auth.signOut();
   redirect("/login");
 }
+
+export async function changePassword(formData: FormData) {
+  const password = formData.get("password") as string;
+  const confirm = formData.get("confirmPassword") as string;
+  if (password !== confirm) return { error: "Passwords do not match" };
+  if (password.length < 6) return { error: "Password must be at least 6 characters" };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message };
+  return { error: null };
+}
