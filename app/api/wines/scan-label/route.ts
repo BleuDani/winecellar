@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { generateObject } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
-import { scrapeVivinoUrl, searchVivinoUrl } from "@/lib/apify";
+import { lookupVivino } from "@/lib/apify";
 
 export const maxDuration = 60;
 
@@ -72,11 +72,7 @@ export async function POST(req: NextRequest) {
       const query = [extracted.producer, extracted.name, extracted.vintage]
         .filter(Boolean)
         .join(" ");
-      const url = await searchVivinoUrl(query);
-      if (url) {
-        const scraped = await scrapeVivinoUrl(url);
-        vivino = { vivinoUrl: url, ...scraped };
-      }
+      vivino = await lookupVivino(query);
     } catch {
       // Vivino lookup is best-effort — label extraction still succeeds without it
     }

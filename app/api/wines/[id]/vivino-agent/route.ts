@@ -3,7 +3,7 @@ import { streamText, tool, stepCountIs } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { scrapeVivinoUrl, searchVivinoUrl } from "@/lib/apify";
+import { lookupVivino } from "@/lib/apify";
 import { saveVivinoData } from "@/actions/wine.actions";
 
 export const maxDuration = 120;
@@ -31,10 +31,9 @@ export async function POST(
     stopWhen: stepCountIs(6),
     system: `You are a wine data enrichment agent. Your job is to fetch data about a wine from Vivino and save it.
 Follow these steps in order:
-1. If the wine has no vivinoUrl, call findVivinoUrl to search for it.
-2. Once you have a URL (either provided or found), call scrapeVivinoPage to get the wine data.
-3. Call saveEnrichmentData to persist the results.
-4. Report a brief summary of what was saved (score, review count, style, food pairings found).
+1. Call lookupVivino with the wine's existing Vivino URL if set, otherwise a search query of producer + name + vintage.
+2. Call saveEnrichmentData to persist the results.
+3. Report a brief summary of what was saved (score, review count, style, food pairings found).
 Be concise and factual. Do not ask questions.`,
     prompt: `Enrich this wine:
 Producer: ${wine.producer}
@@ -42,26 +41,16 @@ Name: ${wine.name}
 Vintage: ${wine.vintage ?? "unknown"}
 Current Vivino URL: ${wine.vivinoUrl ?? "not set"}`,
     tools: {
-      findVivinoUrl: tool({
-        description: "Search Vivino for the wine URL using producer, name, and vintage.",
+      lookupVivino: tool({
+        description: "Search Vivino (or fetch a known Vivino URL) for score, reviews, style, food pairings, and description.",
         inputSchema: z.object({
-          query: z.string().describe("Search query e.g. 'Opus One 2019 Napa'"),
+          query: z.string().describe("A Vivino URL if known, otherwise a search query like 'Opus One 2019 Napa'"),
         }),
         execute: async ({ query }) => {
-          const url = await searchVivinoUrl(query);
-          if (url) {
-            await prisma.wine.update({ where: { id }, data: { vivinoUrl: url } });
+          const data = await lookupVivino(query);
+          if (data.vivinoUrl) {
+            await prisma.wine.update({ where: { id }, data: { vivinoUrl: data.vivinoUrl } });
           }
-          return { url: url ?? null, found: !!url };
-        },
-      }),
-      scrapeVivinoPage: tool({
-        description: "Scrape a Vivino wine page to get score, reviews, style, food pairings, and description.",
-        inputSchema: z.object({
-          url: z.string().url().describe("The Vivino wine page URL"),
-        }),
-        execute: async ({ url }) => {
-          const data = await scrapeVivinoUrl(url);
           return data;
         },
       }),

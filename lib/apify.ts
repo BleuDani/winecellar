@@ -1,7 +1,8 @@
 const APIFY_API_KEY = process.env.APIFY_API_KEY;
 const WINE_SCRAPER_ACTOR = "mrbridge~vivino-wine-data-scraper";
 
-export type VivinoScrapedData = {
+export type VivinoLookupResult = {
+  vivinoUrl: string | null;
   score: number | null;
   reviewCount: number | null;
   wineStyle: string | null;
@@ -9,7 +10,10 @@ export type VivinoScrapedData = {
   description: string | null;
 };
 
-export async function scrapeVivinoUrl(url: string): Promise<VivinoScrapedData> {
+// Accepts either a direct Vivino URL or a free-text search query (e.g. "Opus One 2019 Napa") —
+// the actor auto-detects which and searches Vivino itself, since Vivino's public explore API
+// now blocks direct calls with a CloudFront 403.
+export async function lookupVivino(query: string): Promise<VivinoLookupResult> {
   if (!APIFY_API_KEY) throw new Error("APIFY_API_KEY not configured");
 
   const res = await fetch(
@@ -17,13 +21,14 @@ export async function scrapeVivinoUrl(url: string): Promise<VivinoScrapedData> {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ wines: [url], searchMode: "auto" }),
+      body: JSON.stringify({ wines: [query], searchMode: "auto" }),
     }
   );
 
   if (!res.ok) throw new Error(`Apify returned ${res.status}`);
 
   const items: {
+    vivino_url?: string;
     average_rating?: number;
     ratings_count?: number;
     wine_type?: string;
@@ -33,33 +38,11 @@ export async function scrapeVivinoUrl(url: string): Promise<VivinoScrapedData> {
 
   const item = items[0];
   return {
+    vivinoUrl: item?.vivino_url ?? null,
     score: item?.average_rating ?? null,
     reviewCount: item?.ratings_count ?? null,
     wineStyle: item?.wine_type ?? null,
     foodPairings: item?.food_pairings ?? [],
     description: item?.description ?? null,
   };
-}
-
-export async function searchVivinoUrl(query: string): Promise<string | null> {
-  if (!APIFY_API_KEY) throw new Error("APIFY_API_KEY not configured");
-
-  // Use Vivino's public search API endpoint
-  const searchUrl = `https://www.vivino.com/api/explore/explore?q=${encodeURIComponent(query)}&language=en&min_rating=1`;
-  try {
-    const res = await fetch(searchUrl, {
-      headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" },
-    });
-    if (!res.ok) return null;
-    const json = await res.json() as {
-      explore_vintage?: { matches?: { vintage?: { wine?: { id?: number; seo_name?: string; winery?: { name?: string } } } }[] };
-    };
-    const matches = json?.explore_vintage?.matches ?? [];
-    if (!matches.length) return null;
-    const first = matches[0]?.vintage?.wine;
-    if (!first?.seo_name) return null;
-    return `https://www.vivino.com/wines/${first.seo_name}`;
-  } catch {
-    return null;
-  }
 }
