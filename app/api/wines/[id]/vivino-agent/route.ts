@@ -4,6 +4,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { scrapeVivinoUrl, searchVivinoUrl } from "@/lib/apify";
+import { saveVivinoData } from "@/actions/wine.actions";
 
 export const maxDuration = 120;
 
@@ -75,30 +76,15 @@ Current Vivino URL: ${wine.vivinoUrl ?? "not set"}`,
           vivinoUrl: z.string().nullable().describe("Pass if a URL was found that should be saved"),
         }),
         execute: async ({ score, reviewCount, wineStyle, foodPairings, description, vivinoUrl }) => {
-          await prisma.vivinoData.upsert({
-            where: { wineId: id },
-            create: {
-              wineId: id,
-              score,
-              reviewCount,
-              wineStyle,
-              foodPairings: foodPairings.length ? JSON.stringify(foodPairings) : null,
-              description,
-              fetchedAt: new Date(),
-            },
-            update: {
-              score,
-              reviewCount,
-              wineStyle,
-              foodPairings: foodPairings.length ? JSON.stringify(foodPairings) : null,
-              description,
-              fetchedAt: new Date(),
-            },
+          const { error } = await saveVivinoData(id, {
+            score,
+            reviewCount,
+            wineStyle,
+            foodPairings,
+            description,
+            vivinoUrl,
           });
-          if (vivinoUrl) {
-            await prisma.wine.update({ where: { id }, data: { vivinoUrl } });
-          }
-          return { saved: true };
+          return { saved: !error };
         },
       }),
     },

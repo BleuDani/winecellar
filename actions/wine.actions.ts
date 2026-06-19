@@ -150,6 +150,50 @@ export async function uploadWineLabel(wineId: string, formData: FormData) {
   }
 }
 
+export async function saveVivinoData(
+  wineId: string,
+  data: {
+    score: number | null;
+    reviewCount: number | null;
+    wineStyle: string | null;
+    foodPairings: string[];
+    description: string | null;
+    vivinoUrl?: string | null;
+  }
+) {
+  const userId = await getUserId();
+  if (!userId) return { error: "Unauthorized" };
+  try {
+    await prisma.vivinoData.upsert({
+      where: { wineId },
+      create: {
+        wineId,
+        score: data.score,
+        reviewCount: data.reviewCount,
+        wineStyle: data.wineStyle,
+        foodPairings: data.foodPairings.length ? JSON.stringify(data.foodPairings) : null,
+        description: data.description,
+        fetchedAt: new Date(),
+      },
+      update: {
+        score: data.score,
+        reviewCount: data.reviewCount,
+        wineStyle: data.wineStyle,
+        foodPairings: data.foodPairings.length ? JSON.stringify(data.foodPairings) : null,
+        description: data.description,
+        fetchedAt: new Date(),
+      },
+    });
+    if (data.vivinoUrl) {
+      await prisma.wine.update({ where: { id: wineId }, data: { vivinoUrl: data.vivinoUrl } });
+    }
+    revalidatePath(`/wines/${wineId}`);
+    return { error: null };
+  } catch {
+    return { error: "Failed to save Vivino data" };
+  }
+}
+
 export async function deleteWine(id: string) {
   const userId = await getUserId();
   if (!userId) return { error: "Unauthorized" };
