@@ -102,7 +102,13 @@ export function WineCatalog({
 
         <Select value={cellarId} onValueChange={(v) => setCellarId(v ?? ALL)}>
           <SelectTrigger size="sm">
-            <SelectValue placeholder="Cellar" />
+            <SelectValue placeholder="Cellar">
+              {(value: string) => {
+                if (value === ALL) return "All cellars";
+                const c = cellars.find((c) => c.id === value);
+                return c ? c.name : "Cellar";
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>All cellars</SelectItem>

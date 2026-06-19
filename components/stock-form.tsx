@@ -45,7 +45,13 @@ export function StockForm({
         <Label htmlFor="wineId">Wine *</Label>
         <Select name="wineId" defaultValue={defaultWineId} required>
           <SelectTrigger id="wineId">
-            <SelectValue placeholder="Select a wine…" />
+            <SelectValue placeholder="Select a wine…">
+              {(value: string | null) => {
+                const w = wines.find((w) => w.id === value);
+                if (!w) return "Select a wine…";
+                return `${w.producer} — ${w.name}${w.vintage ? ` (${w.vintage})` : ""}`;
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {wines.map((w) => (
@@ -62,7 +68,12 @@ export function StockForm({
         <Label htmlFor="cellarId">Cellar *</Label>
         <Select name="cellarId" defaultValue={defaultCellarId} required>
           <SelectTrigger id="cellarId">
-            <SelectValue placeholder="Select a cellar…" />
+            <SelectValue placeholder="Select a cellar…">
+              {(value: string | null) => {
+                const c = cellars.find((c) => c.id === value);
+                return c ? c.name : "Select a cellar…";
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {cellars.map((c) => (
