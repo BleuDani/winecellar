@@ -1,5 +1,5 @@
 const APIFY_API_KEY = process.env.APIFY_API_KEY;
-const WINE_SCRAPER_ACTOR = "vivino/wine-scraper";
+const WINE_SCRAPER_ACTOR = "mrbridge~vivino-wine-data-scraper";
 
 export type VivinoScrapedData = {
   score: number | null;
@@ -17,25 +17,26 @@ export async function scrapeVivinoUrl(url: string): Promise<VivinoScrapedData> {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ startUrls: [{ url }] }),
+      body: JSON.stringify({ wines: [url], searchMode: "auto" }),
     }
   );
 
   if (!res.ok) throw new Error(`Apify returned ${res.status}`);
 
   const items: {
-    rating?: { average?: number; reviews_count?: number };
-    style?: { name?: string };
-    food?: string[];
+    average_rating?: number;
+    ratings_count?: number;
+    wine_type?: string;
+    food_pairings?: string[];
     description?: string;
   }[] = await res.json();
 
   const item = items[0];
   return {
-    score: item?.rating?.average ?? null,
-    reviewCount: item?.rating?.reviews_count ?? null,
-    wineStyle: item?.style?.name ?? null,
-    foodPairings: item?.food ?? [],
+    score: item?.average_rating ?? null,
+    reviewCount: item?.ratings_count ?? null,
+    wineStyle: item?.wine_type ?? null,
+    foodPairings: item?.food_pairings ?? [],
     description: item?.description ?? null,
   };
 }
