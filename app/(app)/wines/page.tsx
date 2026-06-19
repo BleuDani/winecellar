@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { getWines } from "@/actions/wine.actions";
+import { getCellars } from "@/actions/cellar.actions";
 import { buttonVariants } from "@/components/ui/button";
-import { WineCard } from "@/components/wine-card";
+import { WineCatalog } from "@/components/wine-catalog";
 import { Plus } from "lucide-react";
 
 export default async function WinesPage() {
   const { data: wines, error } = await getWines();
+  const { data: cellars } = await getCellars();
 
   return (
     <div className="space-y-6">
@@ -23,16 +25,11 @@ export default async function WinesPage() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {wines?.map((wine) => (
-          <WineCard key={wine.id} wine={wine} />
-        ))}
-        {wines?.length === 0 && (
-          <p className="text-sm text-stone-500 col-span-2">
-            No wines in catalog yet.
-          </p>
-        )}
-      </div>
+      {wines?.length === 0 ? (
+        <p className="text-sm text-stone-500">No wines in catalog yet.</p>
+      ) : (
+        <WineCatalog wines={wines ?? []} cellars={cellars ?? []} />
+      )}
     </div>
   );
 }

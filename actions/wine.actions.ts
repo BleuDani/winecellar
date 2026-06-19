@@ -20,7 +20,7 @@ export async function getWines() {
       orderBy: [{ producer: "asc" }, { name: "asc" }],
       include: {
         vivinoData: true,
-        stockItems: { select: { quantity: true } },
+        stockItems: { select: { quantity: true, cellar: { select: { id: true, name: true } } } },
         grapes: { include: { grape: true } },
       },
     });
