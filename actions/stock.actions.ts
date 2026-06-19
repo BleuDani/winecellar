@@ -99,3 +99,67 @@ export async function deleteStockItem(id: string) {
     return { error: "Failed to delete stock item" };
   }
 }
+
+export async function withdrawStock(stockItemId: string, formData: FormData) {
+  const userId = await getUserId();
+  if (!userId) return { error: "Unauthorized" };
+  try {
+    const item = await prisma.stockItem.findUnique({
+      where: { id: stockItemId },
+      include: { cellar: true },
+    });
+    if (!item || !(item.cellar.userId === userId || item.cellar.userId === "")) {
+      return { error: "Not found" };
+    }
+
+    const quantity = parseInt(formData.get("quantity") as string) || 0;
+    if (quantity < 1 || quantity > item.quantity) {
+      return { error: "Invalid quantity" };
+    }
+    const reason = (formData.get("reason") as string) || null;
+    const withdrawnAtRaw = formData.get("withdrawnAt") as string;
+    const withdrawnAt = withdrawnAtRaw ? new Date(withdrawnAtRaw) : new Date();
+
+    await prisma.$transaction(async (tx) => {
+      await tx.withdrawal.create({
+        data: {
+          wineId: item.wineId,
+          cellarId: item.cellarId,
+          quantity,
+          reason,
+          withdrawnAt,
+        },
+      });
+      if (quantity === item.quantity) {
+        await tx.stockItem.delete({ where: { id: stockItemId } });
+      } else {
+        await tx.stockItem.update({
+          where: { id: stockItemId },
+          data: { quantity: item.quantity - quantity },
+        });
+      }
+    });
+
+    revalidatePath("/");
+    revalidatePath(`/cellars/${item.cellarId}`);
+    revalidatePath(`/wines/${item.wineId}`);
+    return { error: null };
+  } catch {
+    return { error: "Failed to withdraw stock" };
+  }
+}
+
+export async function getWithdrawalsForWine(wineId: string) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
+  try {
+    const data = await prisma.withdrawal.findMany({
+      where: { wineId },
+      include: { cellar: true },
+      orderBy: { withdrawnAt: "desc" },
+    });
+    return { data, error: null };
+  } catch {
+    return { data: null, error: "Failed to fetch withdrawal history" };
+  }
+}

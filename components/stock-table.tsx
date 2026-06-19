@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { removeStockItem } from "@/actions/stock.actions";
+import { WithdrawStockDialog } from "@/components/withdraw-stock-dialog";
 import { Trash2 } from "lucide-react";
 
 type StockItem = {
@@ -18,6 +19,7 @@ type StockItem = {
   binLocation: string | null;
   drinkFrom: number | null;
   drinkUntil: number | null;
+  createdAt: string | Date;
   wine?: {
     id: string;
     producer: string;
@@ -54,6 +56,7 @@ export function StockTable({
           <TableHead>Bin</TableHead>
           <TableHead>Drink Window</TableHead>
           <TableHead className="text-right">Price</TableHead>
+          <TableHead>Added</TableHead>
           <TableHead />
         </TableRow>
       </TableHeader>
@@ -105,17 +108,27 @@ export function StockTable({
                 ? `€${Number(item.purchasePrice).toFixed(2)}`
                 : "—"}
             </TableCell>
+            <TableCell className="text-stone-500 whitespace-nowrap">
+              {new Date(item.createdAt).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </TableCell>
             <TableCell>
-              <form action={removeStockItem.bind(null, item.id)}>
-                <Button
-                  type="submit"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-stone-400 hover:text-red-600"
-                >
-                  <Trash2 size={14} />
-                </Button>
-              </form>
+              <div className="flex items-center justify-end gap-1">
+                <WithdrawStockDialog stockItemId={item.id} maxQuantity={item.quantity} />
+                <form action={removeStockItem.bind(null, item.id)}>
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-stone-400 hover:text-red-600"
+                  >
+                    <Trash2 size={14} />
+                  </Button>
+                </form>
+              </div>
             </TableCell>
           </TableRow>
         ))}

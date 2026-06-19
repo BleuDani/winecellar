@@ -9,30 +9,32 @@ datasource db {
 }
 
 model Cellar {
-  id         String      @id @default(cuid())
-  userId     String      @default("")
-  name       String
-  location   String?
-  createdAt  DateTime    @default(now())
-  stockItems StockItem[]
+  id          String       @id @default(cuid())
+  userId      String       @default("")
+  name        String
+  location    String?
+  createdAt   DateTime     @default(now())
+  stockItems  StockItem[]
+  withdrawals Withdrawal[]
 }
 
 model Wine {
-  id         String      @id @default(cuid())
-  userId     String      @default("")
-  producer   String
-  name       String
-  vintage    Int?
-  region     String?
-  country    String?
+  id          String       @id @default(cuid())
+  userId      String       @default("")
+  producer    String
+  name        String
+  vintage     Int?
+  region      String?
+  country     String?
   vivinoUrl   String?
   notes       String?
   labelImage  String?
-  createdAt   DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  stockItems StockItem[]
-  vivinoData VivinoData?
-  grapes     WineGrape[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  stockItems  StockItem[]
+  vivinoData  VivinoData?
+  grapes      WineGrape[]
+  withdrawals Withdrawal[]
 }
 
 model Grape {
@@ -64,6 +66,18 @@ model StockItem {
   updatedAt     DateTime @updatedAt
   wine          Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
   cellar        Cellar   @relation(fields: [cellarId], references: [id], onDelete: Cascade)
+}
+
+model Withdrawal {
+  id          String   @id @default(cuid())
+  wineId      String
+  cellarId    String
+  quantity    Int
+  reason      String?
+  withdrawnAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  wine        Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
+  cellar      Cellar   @relation(fields: [cellarId], references: [id], onDelete: Cascade)
 }
 
 model VivinoData {

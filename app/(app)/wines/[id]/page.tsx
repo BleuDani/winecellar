@@ -1,13 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getWine } from "@/actions/wine.actions";
+import { getWithdrawalsForWine } from "@/actions/stock.actions";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StockTable } from "@/components/stock-table";
 import { VivinoAgentButton } from "@/components/vivino-agent-button";
 import { LabelImageUpload } from "@/components/label-image-upload";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, GlassWater } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default async function WineDetailPage({
@@ -17,6 +18,7 @@ export default async function WineDetailPage({
 }) {
   const { id } = await params;
   const { data: wine, error } = await getWine(id);
+  const { data: withdrawals } = await getWithdrawalsForWine(id);
 
   if (!wine) return notFound();
 
@@ -131,6 +133,40 @@ export default async function WineDetailPage({
         <h2 className="text-lg font-semibold mb-3">Stock by Cellar</h2>
         <StockTable stockItems={wine.stockItems} showCellar />
       </div>
+
+      {withdrawals && withdrawals.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <GlassWater size={16} /> Withdrawal History
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {withdrawals.map((w) => (
+              <div key={w.id} className="flex items-start justify-between gap-4 text-sm border-b border-border pb-3 last:border-0 last:pb-0">
+                <div>
+                  <p>
+                    <span className="font-medium">
+                      {w.quantity} {w.quantity === 1 ? "bottle" : "bottles"}
+                    </span>{" "}
+                    <span className="text-muted-foreground">from {w.cellar.name}</span>
+                  </p>
+                  {w.reason && (
+                    <p className="text-muted-foreground mt-0.5 whitespace-pre-wrap">{w.reason}</p>
+                  )}
+                </div>
+                <p className="text-muted-foreground whitespace-nowrap">
+                  {new Date(w.withdrawnAt).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
