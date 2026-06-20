@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StockTable } from "@/components/stock-table";
 import { EditCellarDialog } from "@/components/edit-cellar-dialog";
+import { CellarBackgroundUpload } from "@/components/cellar-background-upload";
 import { Plus } from "lucide-react";
 
 export default async function CellarDetailPage({
@@ -43,6 +44,8 @@ export default async function CellarDetailPage({
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <CellarBackgroundUpload cellarId={id} currentImage={cellar.backgroundImage} />
 
       <StockTable stockItems={cellar.stockItems} showWine />
     </div>

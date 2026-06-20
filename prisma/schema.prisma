@@ -9,13 +9,14 @@ datasource db {
 }
 
 model Cellar {
-  id          String       @id @default(cuid())
-  userId      String       @default("")
-  name        String
-  location    String?
-  createdAt   DateTime     @default(now())
-  stockItems  StockItem[]
-  withdrawals Withdrawal[]
+  id              String       @id @default(cuid())
+  userId          String       @default("")
+  name            String
+  location        String?
+  backgroundImage String?
+  createdAt       DateTime     @default(now())
+  stockItems      StockItem[]
+  withdrawals     Withdrawal[]
 }
 
 model Wine {

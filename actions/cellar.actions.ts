@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { createClient as createStorageClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 
 async function getUserId() {
@@ -93,5 +94,45 @@ export async function deleteCellar(id: string) {
     return { error: null };
   } catch {
     return { error: "Failed to delete cellar" };
+  }
+}
+
+export async function uploadCellarBackground(cellarId: string, formData: FormData) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
+  try {
+    const file = formData.get("backgroundImage") as File;
+    if (!file || file.size === 0) return { error: "No file provided" };
+
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const allowed = ["jpg", "jpeg", "png", "webp", "avif"];
+    if (!allowed.includes(ext)) return { error: "Only jpg, png, webp or avif allowed" };
+
+    const cellar = await prisma.cellar.findUnique({ where: { id: cellarId, userId } });
+    if (!cellar) return { data: null, error: "Cellar not found" };
+
+    const supabase = createStorageClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const filename = `${cellarId}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("cellar-backgrounds")
+      .upload(filename, file, { upsert: true, contentType: file.type });
+
+    if (uploadError) return { data: null, error: "Failed to upload background image" };
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("cellar-backgrounds")
+      .getPublicUrl(filename);
+
+    await prisma.cellar.update({ where: { id: cellarId }, data: { backgroundImage: publicUrl } });
+
+    revalidatePath("/cellars");
+    revalidatePath(`/cellars/${cellarId}`);
+    return { data: publicUrl, error: null };
+  } catch {
+    return { data: null, error: "Failed to upload background image" };
   }
 }
