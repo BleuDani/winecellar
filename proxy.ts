@@ -2,6 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const isPwaAsset =
+    path === "/manifest.webmanifest" ||
+    path === "/icon" ||
+    path === "/apple-icon" ||
+    path === "/sw.js";
+
+  if (isPwaAsset) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -26,7 +37,6 @@ export async function proxy(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  const path = request.nextUrl.pathname;
   const isAuthPage = path.startsWith("/login") || path.startsWith("/register");
 
   if (!user && !isAuthPage) {

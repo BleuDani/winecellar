@@ -17,7 +17,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-sidebar flex">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-sidebar flex pb-[max(0.5rem,env(safe-area-inset-bottom))]">
       {nav.map(({ href, label, icon: Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
         return (
@@ -25,7 +25,7 @@ export function BottomNav() {
             key={href}
             href={href}
             className={cn(
-              "flex-1 flex flex-col items-center gap-1 py-2 text-[10px] transition-colors",
+              "flex-1 flex flex-col items-center gap-1 pt-2 text-[10px] transition-colors",
               active
                 ? "text-primary"
                 : "text-sidebar-foreground/60 hover:text-primary"
