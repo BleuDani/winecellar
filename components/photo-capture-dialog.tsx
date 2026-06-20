@@ -5,6 +5,45 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload, Camera, RotateCcw, Check } from "lucide-react";
 
+const MAX_DIMENSION = 1600;
+const SKIP_BELOW_BYTES = 500_000;
+
+// Phone camera-roll photos can be several MB at full sensor resolution; downscaling
+// client-side before upload meaningfully speeds up the upload over a cellular connection.
+async function downscaleImage(file: File): Promise<File> {
+  if (file.size < SKIP_BELOW_BYTES) return file;
+
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new window.Image();
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = objectUrl;
+    });
+
+    const scale = Math.min(1, MAX_DIMENSION / Math.max(img.width, img.height));
+    if (scale === 1) return file;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.85)
+    );
+    if (!blob) return file;
+    return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch {
+    return file;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export function PhotoCapture({
   onPhoto,
   disabled,
@@ -78,10 +117,10 @@ export function PhotoCapture({
     onPhoto(file);
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    onPhoto(file);
+    onPhoto(await downscaleImage(file));
     e.target.value = "";
   }
 

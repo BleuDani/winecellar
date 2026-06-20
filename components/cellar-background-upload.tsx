@@ -33,7 +33,14 @@ export function CellarBackgroundUpload({
     <div className="space-y-3">
       {preview ? (
         <div className="relative h-40 sm:h-56 w-full rounded-xl overflow-hidden border border-border">
-          <Image src={preview} alt="Cellar background" fill className="object-cover" unoptimized />
+          <Image
+            src={preview}
+            alt="Cellar background"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            unoptimized={preview.startsWith("blob:")}
+          />
         </div>
       ) : (
         <div className="h-40 sm:h-56 w-full rounded-xl border-2 border-dashed border-border flex items-center justify-center text-muted-foreground text-sm">

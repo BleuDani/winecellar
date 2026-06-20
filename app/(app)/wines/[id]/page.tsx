@@ -19,8 +19,10 @@ export default async function WineDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { data: wine, error } = await getWine(id);
-  const { data: withdrawals } = await getWithdrawalsForWine(id);
+  const [{ data: wine, error }, { data: withdrawals }] = await Promise.all([
+    getWine(id),
+    getWithdrawalsForWine(id),
+  ]);
 
   if (!wine) return notFound();
 

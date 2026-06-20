@@ -29,8 +29,8 @@ export function WineCard({ wine }: { wine: Wine }) {
               src={wine.labelImage}
               alt={`${wine.name} label`}
               fill
+              sizes="(min-width: 640px) 50vw, 100vw"
               className="object-cover"
-              unoptimized
             />
           </div>
         )}

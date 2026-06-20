@@ -3,13 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { createClient as createStorageClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
-
-async function getUserId() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user?.id ?? null;
-}
+import { getUserId } from "@/lib/auth";
 
 export async function getCellars() {
   const userId = await getUserId();

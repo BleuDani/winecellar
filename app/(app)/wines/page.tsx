@@ -6,8 +6,10 @@ import { WineCatalog } from "@/components/wine-catalog";
 import { Plus } from "lucide-react";
 
 export default async function WinesPage() {
-  const { data: wines, error } = await getWines();
-  const { data: cellars } = await getCellars();
+  const [{ data: wines, error }, { data: cellars }] = await Promise.all([
+    getWines(),
+    getCellars(),
+  ]);
 
   return (
     <div className="space-y-6">

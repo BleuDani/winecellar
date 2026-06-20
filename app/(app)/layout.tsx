@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LayoutDashboard, Wine, Warehouse, LogOut } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import { signOut } from "@/actions/auth.actions";
 
 const nav = [
@@ -11,8 +11,7 @@ const nav = [
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   const nickname = user?.user_metadata?.nickname as string | undefined;
   const cellarTitle = nickname ? `${nickname}'s Wine Cellar` : "Wine Cellar";
 

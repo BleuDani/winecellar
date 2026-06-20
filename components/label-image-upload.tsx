@@ -33,7 +33,14 @@ export function LabelImageUpload({
     <div className="space-y-3">
       {preview ? (
         <div className="relative w-40 h-56 rounded-lg overflow-hidden border border-border">
-          <Image src={preview} alt="Wine label" fill className="object-cover" unoptimized />
+          <Image
+            src={preview}
+            alt="Wine label"
+            fill
+            sizes="160px"
+            className="object-cover"
+            unoptimized={preview.startsWith("blob:")}
+          />
         </div>
       ) : (
         <div className="w-40 h-56 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground text-sm">
