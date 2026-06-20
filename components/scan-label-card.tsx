@@ -4,13 +4,7 @@ import { useState } from "react";
 import { PhotoCapture } from "@/components/photo-capture-dialog";
 import { Loader2, Sparkles } from "lucide-react";
 
-export type ScanResult = {
-  producer: string | null;
-  name: string | null;
-  vintage: number | null;
-  region: string | null;
-  country: string | null;
-  grapeGuesses: string[];
+export type VivinoEnrichment = {
   vivinoUrl: string | null;
   score: number | null;
   reviewCount: number | null;
@@ -19,12 +13,33 @@ export type ScanResult = {
   description: string | null;
 };
 
+export type ScanResult = {
+  producer: string | null;
+  name: string | null;
+  vintage: number | null;
+  region: string | null;
+  country: string | null;
+  grapeGuesses: string[];
+} & VivinoEnrichment;
+
+const emptyVivino: VivinoEnrichment = {
+  vivinoUrl: null,
+  score: null,
+  reviewCount: null,
+  wineStyle: null,
+  foodPairings: [],
+  description: null,
+};
+
 export function ScanLabelCard({
   onScanned,
+  onVivinoEnriched,
 }: {
   onScanned: (result: ScanResult, image: File) => void;
+  onVivinoEnriched: (vivino: VivinoEnrichment) => void;
 }) {
   const [scanning, setScanning] = useState(false);
+  const [enriching, setEnriching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanned, setScanned] = useState(false);
 
@@ -36,13 +51,33 @@ export function ScanLabelCard({
       const formData = new FormData();
       formData.append("image", file);
       const res = await fetch("/api/wines/scan-label", { method: "POST", body: formData });
-      const result = await res.json();
+      const extracted = await res.json();
       if (!res.ok) {
-        setError(result.error ?? "Couldn't read the label. Fill in the details manually.");
+        setError(extracted.error ?? "Couldn't read the label. Fill in the details manually.");
         return;
       }
       setScanned(true);
-      onScanned(result, file);
+      onScanned({ ...extracted, ...emptyVivino }, file);
+
+      // Vivino lookup is a slow live scrape — fetch it separately in the
+      // background so field auto-fill isn't blocked waiting on it.
+      const query = [extracted.producer, extracted.name, extracted.vintage]
+        .filter(Boolean)
+        .join(" ");
+      if (query) {
+        setEnriching(true);
+        fetch("/api/wines/lookup-vivino", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((vivino) => {
+            if (vivino) onVivinoEnriched(vivino);
+          })
+          .catch(() => {})
+          .finally(() => setEnriching(false));
+      }
     } catch {
       setError("Couldn't read the label. Fill in the details manually.");
     } finally {
@@ -70,6 +105,7 @@ export function ScanLabelCard({
       {scanned && !scanning && !error && (
         <p className="text-sm text-muted-foreground">
           Label scanned — review the fields below before saving.
+          {enriching && " Looking up Vivino…"}
         </p>
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}

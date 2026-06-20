@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { GrapeMultiSelect } from "@/components/grape-multi-select";
-import { ScanLabelCard, type ScanResult } from "@/components/scan-label-card";
+import { ScanLabelCard, type ScanResult, type VivinoEnrichment } from "@/components/scan-label-card";
 
 type Grape = { id: string; name: string };
 
@@ -23,6 +23,10 @@ export function WineForm({ allGrapes }: { allGrapes: Grape[] }) {
     setScan(result);
     setScanImage(image);
     setScanVersion((v) => v + 1);
+  }
+
+  function handleVivinoEnriched(vivino: VivinoEnrichment) {
+    setScan((prev) => (prev ? { ...prev, ...vivino } : prev));
   }
 
   const preselectedGrapeIds = scan
@@ -68,7 +72,7 @@ export function WineForm({ allGrapes }: { allGrapes: Grape[] }) {
 
   return (
     <form action={handleSubmit} className="space-y-4">
-      <ScanLabelCard onScanned={handleScanned} />
+      <ScanLabelCard onScanned={handleScanned} onVivinoEnriched={handleVivinoEnriched} />
 
       <div key={scanVersion} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -108,6 +112,7 @@ export function WineForm({ allGrapes }: { allGrapes: Grape[] }) {
         <div className="space-y-1.5">
           <Label htmlFor="vivinoUrl">Vivino URL</Label>
           <Input
+            key={scan?.vivinoUrl ?? "no-vivino"}
             id="vivinoUrl"
             name="vivinoUrl"
             type="url"
