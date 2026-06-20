@@ -31,9 +31,9 @@ export async function POST(
     stopWhen: stepCountIs(6),
     system: `You are a wine data enrichment agent. Your job is to fetch data about a wine from Vivino and save it.
 Follow these steps in order:
-1. Call lookupVivino with the wine's existing Vivino URL if set, otherwise a search query of producer + name + vintage.
-2. Call saveEnrichmentData to persist the results.
-3. Report a brief summary of what was saved (score, review count, style, food pairings found).
+1. Call lookupVivino with the wine's existing Vivino URL if set, otherwise a search query of producer + name + vintage. This also returns a taste profile (body, tannins, acidity, sweetness, fizziness on a 1-5 scale) and flavor notes when available.
+2. Call saveEnrichmentData to persist the results, including the taste profile and flavor notes from step 1 (pass null/empty if Vivino didn't have them).
+3. Report a brief summary of what was saved (score, review count, style, food pairings, and taste profile found).
 Be concise and factual. Do not ask questions.`,
     prompt: `Enrich this wine:
 Producer: ${wine.producer}
@@ -42,7 +42,7 @@ Vintage: ${wine.vintage ?? "unknown"}
 Current Vivino URL: ${wine.vivinoUrl ?? "not set"}`,
     tools: {
       lookupVivino: tool({
-        description: "Search Vivino (or fetch a known Vivino URL) for score, reviews, style, food pairings, and description.",
+        description: "Search Vivino (or fetch a known Vivino URL) for score, reviews, style, food pairings, description, taste profile, and flavor notes.",
         inputSchema: z.object({
           query: z.string().describe("A Vivino URL if known, otherwise a search query like 'Opus One 2019 Napa'"),
         }),
@@ -63,8 +63,19 @@ Current Vivino URL: ${wine.vivinoUrl ?? "not set"}`,
           foodPairings: z.array(z.string()),
           description: z.string().nullable(),
           vivinoUrl: z.string().nullable().describe("Pass if a URL was found that should be saved"),
+          tasteProfile: z
+            .object({
+              body: z.number().nullable(),
+              tannins: z.number().nullable(),
+              acidity: z.number().nullable(),
+              sweetness: z.number().nullable(),
+              fizziness: z.number().nullable(),
+            })
+            .nullable()
+            .describe("From lookupVivino's taste profile, or null if Vivino had none"),
+          flavorNotes: z.array(z.string()),
         }),
-        execute: async ({ score, reviewCount, wineStyle, foodPairings, description, vivinoUrl }) => {
+        execute: async ({ score, reviewCount, wineStyle, foodPairings, description, vivinoUrl, tasteProfile, flavorNotes }) => {
           const { error } = await saveVivinoData(id, {
             score,
             reviewCount,
@@ -72,6 +83,8 @@ Current Vivino URL: ${wine.vivinoUrl ?? "not set"}`,
             foodPairings,
             description,
             vivinoUrl,
+            tasteProfile,
+            flavorNotes,
           });
           return { saved: !error };
         },

@@ -159,11 +159,21 @@ export async function saveVivinoData(
     foodPairings: string[];
     description: string | null;
     vivinoUrl?: string | null;
+    tasteProfile?: {
+      body: number | null;
+      tannins: number | null;
+      acidity: number | null;
+      sweetness: number | null;
+      fizziness: number | null;
+    } | null;
+    flavorNotes?: string[];
   }
 ) {
   const userId = await getUserId();
   if (!userId) return { error: "Unauthorized" };
   try {
+    const tp = data.tasteProfile ?? null;
+    const flavorNotes = data.flavorNotes ?? [];
     await prisma.vivinoData.upsert({
       where: { wineId },
       create: {
@@ -173,6 +183,12 @@ export async function saveVivinoData(
         wineStyle: data.wineStyle,
         foodPairings: data.foodPairings.length ? JSON.stringify(data.foodPairings) : null,
         description: data.description,
+        tasteBody: tp?.body ?? null,
+        tasteTannins: tp?.tannins ?? null,
+        tasteAcidity: tp?.acidity ?? null,
+        tasteSweetness: tp?.sweetness ?? null,
+        tasteFizziness: tp?.fizziness ?? null,
+        flavorNotes: flavorNotes.length ? JSON.stringify(flavorNotes) : null,
         fetchedAt: new Date(),
       },
       update: {
@@ -181,6 +197,12 @@ export async function saveVivinoData(
         wineStyle: data.wineStyle,
         foodPairings: data.foodPairings.length ? JSON.stringify(data.foodPairings) : null,
         description: data.description,
+        tasteBody: tp?.body ?? null,
+        tasteTannins: tp?.tannins ?? null,
+        tasteAcidity: tp?.acidity ?? null,
+        tasteSweetness: tp?.sweetness ?? null,
+        tasteFizziness: tp?.fizziness ?? null,
+        flavorNotes: flavorNotes.length ? JSON.stringify(flavorNotes) : null,
         fetchedAt: new Date(),
       },
     });
@@ -191,6 +213,22 @@ export async function saveVivinoData(
     return { error: null };
   } catch {
     return { error: "Failed to save Vivino data" };
+  }
+}
+
+export async function updateUserRating(wineId: string, rating: number | null) {
+  const userId = await getUserId();
+  if (!userId) return { error: "Unauthorized" };
+  if (rating !== null && (rating < 0 || rating > 5)) {
+    return { error: "Rating must be between 0 and 5" };
+  }
+  try {
+    await prisma.wine.update({ where: { id: wineId, userId }, data: { userRating: rating } });
+    revalidatePath("/wines");
+    revalidatePath(`/wines/${wineId}`);
+    return { error: null };
+  } catch {
+    return { error: "Failed to update rating" };
   }
 }
 

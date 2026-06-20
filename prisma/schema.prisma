@@ -29,6 +29,7 @@ model Wine {
   vivinoUrl   String?
   notes       String?
   labelImage  String?
+  userRating  Float?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   stockItems  StockItem[]
@@ -81,13 +82,19 @@ model Withdrawal {
 }
 
 model VivinoData {
-  id           String   @id @default(cuid())
-  wineId       String   @unique
-  score        Float?
-  reviewCount  Int?
-  wineStyle    String?
-  foodPairings String?
-  description  String?
-  fetchedAt    DateTime @default(now())
-  wine         Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  wineId         String   @unique
+  score          Float?
+  reviewCount    Int?
+  wineStyle      String?
+  foodPairings   String?
+  description    String?
+  tasteBody      Float?
+  tasteTannins   Float?
+  tasteAcidity   Float?
+  tasteSweetness Float?
+  tasteFizziness Float?
+  flavorNotes    String?
+  fetchedAt      DateTime @default(now())
+  wine           Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
 }

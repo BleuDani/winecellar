@@ -14,6 +14,7 @@ type Wine = {
   labelImage: string | null;
   stockItems: { quantity: number }[];
   vivinoData: { score: unknown } | null;
+  userRating?: number | null;
 };
 
 export function WineCard({ wine }: { wine: Wine }) {
@@ -66,6 +67,11 @@ export function WineCard({ wine }: { wine: Wine }) {
           {wine.vivinoData && (
             <Badge className="text-xs bg-red-700 hover:bg-red-700">
               ★ {String(wine.vivinoData.score)}
+            </Badge>
+          )}
+          {wine.userRating != null && (
+            <Badge variant="outline" className="text-xs">
+              Your: {wine.userRating}★
             </Badge>
           )}
         </CardContent>

@@ -1,6 +1,14 @@
 const APIFY_API_KEY = process.env.APIFY_API_KEY;
 const WINE_SCRAPER_ACTOR = "mrbridge~vivino-wine-data-scraper";
 
+export type VivinoTasteProfile = {
+  body: number | null;
+  tannins: number | null;
+  acidity: number | null;
+  sweetness: number | null;
+  fizziness: number | null;
+};
+
 export type VivinoLookupResult = {
   vivinoUrl: string | null;
   score: number | null;
@@ -8,6 +16,8 @@ export type VivinoLookupResult = {
   wineStyle: string | null;
   foodPairings: string[];
   description: string | null;
+  tasteProfile: VivinoTasteProfile | null;
+  flavorNotes: string[];
 };
 
 // Accepts either a direct Vivino URL or a free-text search query (e.g. "Opus One 2019 Napa") —
@@ -21,7 +31,7 @@ export async function lookupVivino(query: string): Promise<VivinoLookupResult> {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ wines: [query], searchMode: "auto" }),
+      body: JSON.stringify({ wines: [query], searchMode: "auto", includeTasteProfile: true }),
     }
   );
 
@@ -34,9 +44,18 @@ export async function lookupVivino(query: string): Promise<VivinoLookupResult> {
     wine_type?: string;
     food_pairings?: string[];
     description?: string;
+    taste_profile?: {
+      body?: number | null;
+      tannins?: number | null;
+      acidity?: number | null;
+      sweetness?: number | null;
+      fizziness?: number | null;
+    };
+    flavor_notes?: string[];
   }[] = await res.json();
 
   const item = items[0];
+  const tp = item?.taste_profile;
   return {
     vivinoUrl: item?.vivino_url ?? null,
     score: item?.average_rating ?? null,
@@ -44,5 +63,15 @@ export async function lookupVivino(query: string): Promise<VivinoLookupResult> {
     wineStyle: item?.wine_type ?? null,
     foodPairings: item?.food_pairings ?? [],
     description: item?.description ?? null,
+    tasteProfile: tp
+      ? {
+          body: tp.body ?? null,
+          tannins: tp.tannins ?? null,
+          acidity: tp.acidity ?? null,
+          sweetness: tp.sweetness ?? null,
+          fizziness: tp.fizziness ?? null,
+        }
+      : null,
+    flavorNotes: item?.flavor_notes ?? [],
   };
 }

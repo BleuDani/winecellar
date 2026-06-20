@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StockTable } from "@/components/stock-table";
 import { VivinoAgentButton } from "@/components/vivino-agent-button";
 import { LabelImageUpload } from "@/components/label-image-upload";
+import { StarRatingInput } from "@/components/star-rating-input";
+import { TasteScale } from "@/components/taste-scale";
 import { Pencil, Plus, GlassWater } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +29,11 @@ export default async function WineDetailPage({
   const foodPairings: string[] = vd?.foodPairings
     ? (JSON.parse(vd.foodPairings) as string[])
     : [];
+  const flavorNotes: string[] = vd?.flavorNotes
+    ? (JSON.parse(vd.flavorNotes) as string[])
+    : [];
+  const hasTasteProfile =
+    vd && [vd.tasteBody, vd.tasteTannins, vd.tasteAcidity, vd.tasteSweetness].some((v) => v != null);
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -59,6 +66,16 @@ export default async function WineDetailPage({
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {/* Your rating */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Your Rating</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StarRatingInput wineId={id} value={wine.userRating} />
+        </CardContent>
+      </Card>
 
       {/* Label photo */}
       <Card>
@@ -95,6 +112,25 @@ export default async function WineDetailPage({
                   </div>
                 )}
               </div>
+              {hasTasteProfile && (
+                <div className="grid grid-cols-2 gap-4 max-w-sm">
+                  <TasteScale lowLabel="Light" highLabel="Bold" value={vd.tasteBody} />
+                  <TasteScale lowLabel="Smooth" highLabel="Tannic" value={vd.tasteTannins} />
+                  <TasteScale lowLabel="Soft" highLabel="Acidic" value={vd.tasteAcidity} />
+                  <TasteScale lowLabel="Dry" highLabel="Sweet" value={vd.tasteSweetness} />
+                  <TasteScale lowLabel="Still" highLabel="Fizzy" value={vd.tasteFizziness} />
+                </div>
+              )}
+              {flavorNotes.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Flavor notes</p>
+                  <div className="flex flex-wrap gap-1">
+                    {flavorNotes.map((f) => (
+                      <Badge key={f} variant="outline" className="text-xs">{f}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
               {foodPairings.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1">Pairs with</p>
