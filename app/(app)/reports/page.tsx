@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { DownloadReportPdfButton } from "@/components/download-report-pdf-button";
 import { GlassWater } from "lucide-react";
 
 function isoDate(d: Date) {
@@ -30,25 +31,46 @@ export default async function ReportsPage({
   const totalBottles = withdrawals?.reduce((s, w) => s + w.quantity, 0) ?? 0;
   const distinctWines = new Set(withdrawals?.map((w) => w.wineId)).size;
 
+  const pdfWithdrawals =
+    withdrawals?.map((w) => ({
+      id: w.id,
+      wineLabel: `${w.wine.producer} — ${w.wine.name}${w.wine.vintage ? ` (${w.wine.vintage})` : ""}`,
+      cellarName: w.cellar.name,
+      quantity: w.quantity,
+      reason: w.reason,
+      observation: w.observation,
+      wouldBuyAgain: w.wouldBuyAgain,
+      withdrawnAt: w.withdrawnAt.toISOString(),
+    })) ?? [];
+
   return (
     <div className="space-y-6 max-w-3xl">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Reports</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Wines consumed over a chosen period
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Reports</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Wines consumed over a chosen period
+          </p>
+        </div>
+        <DownloadReportPdfButton
+          startDate={startDate}
+          endDate={endDate}
+          totalBottles={totalBottles}
+          distinctWines={distinctWines}
+          withdrawals={pdfWithdrawals}
+        />
       </div>
 
-      <form className="flex flex-wrap items-end gap-3" action="/reports">
-        <div className="space-y-1.5">
+      <form className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3" action="/reports">
+        <div className="space-y-1.5 w-full sm:w-auto">
           <Label htmlFor="from">From</Label>
-          <Input id="from" name="from" type="date" defaultValue={startDate} />
+          <Input id="from" name="from" type="date" defaultValue={startDate} className="w-full sm:w-auto" />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 w-full sm:w-auto">
           <Label htmlFor="to">To</Label>
-          <Input id="to" name="to" type="date" defaultValue={endDate} />
+          <Input id="to" name="to" type="date" defaultValue={endDate} className="w-full sm:w-auto" />
         </div>
-        <Button type="submit">Apply</Button>
+        <Button type="submit" className="w-full sm:w-auto">Apply</Button>
       </form>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
