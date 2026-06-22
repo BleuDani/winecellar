@@ -13,6 +13,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { GlassWater } from "lucide-react";
 
 export function WithdrawStockDialog({
@@ -85,6 +92,32 @@ export function WithdrawStockDialog({
               rows={3}
               placeholder="e.g. Anniversary dinner, gift to a friend, corked and discarded…"
             />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="withdraw-observation">Tasting notes (optional)</Label>
+            <Textarea
+              id="withdraw-observation"
+              name="observation"
+              rows={3}
+              placeholder="How did it taste? Anything to remember for next time…"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="withdraw-would-buy-again">Would buy again?</Label>
+            <Select name="wouldBuyAgain" defaultValue="">
+              <SelectTrigger id="withdraw-would-buy-again" className="w-full">
+                <SelectValue placeholder="Not sure yet">
+                  {(value: string | null) =>
+                    value === "yes" ? "Yes" : value === "no" ? "No" : "Not sure yet"
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Not sure yet</SelectItem>
+                <SelectItem value="yes">Yes</SelectItem>
+                <SelectItem value="no">No</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Button type="submit" disabled={isPending} className="w-full">
             {isPending ? "Saving…" : "Withdraw"}

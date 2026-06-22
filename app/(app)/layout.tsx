@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Wine, Warehouse, LogOut } from "lucide-react";
+import { LayoutDashboard, Wine, Warehouse, History, LogOut } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { getCurrentUser } from "@/lib/auth";
 import { signOut } from "@/actions/auth.actions";
@@ -8,6 +8,7 @@ const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/cellars", label: "Cellars", icon: Warehouse },
   { href: "/wines", label: "Wines", icon: Wine },
+  { href: "/reports", label: "Reports", icon: History },
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {

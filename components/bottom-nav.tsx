@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Wine, Warehouse, User } from "lucide-react";
+import { LayoutDashboard, Wine, Warehouse, History, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/cellars", label: "Cellars", icon: Warehouse },
   { href: "/wines", label: "Wines", icon: Wine },
+  { href: "/reports", label: "Reports", icon: History },
   { href: "/account", label: "Account", icon: User },
 ];
 

@@ -192,6 +192,14 @@ export default async function WineDetailPage({
                   {w.reason && (
                     <p className="text-muted-foreground mt-0.5 whitespace-pre-wrap">{w.reason}</p>
                   )}
+                  {w.observation && (
+                    <p className="text-muted-foreground mt-0.5 whitespace-pre-wrap">{w.observation}</p>
+                  )}
+                  {w.wouldBuyAgain !== null && (
+                    <Badge variant="outline" className="mt-1">
+                      {w.wouldBuyAgain ? "Would buy again" : "Wouldn't buy again"}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-muted-foreground whitespace-nowrap">
                   {new Date(w.withdrawnAt).toLocaleDateString(undefined, {

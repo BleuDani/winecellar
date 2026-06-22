@@ -71,15 +71,17 @@ model StockItem {
 }
 
 model Withdrawal {
-  id          String   @id @default(cuid())
-  wineId      String
-  cellarId    String
-  quantity    Int
-  reason      String?
-  withdrawnAt DateTime @default(now())
-  createdAt   DateTime @default(now())
-  wine        Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
-  cellar      Cellar   @relation(fields: [cellarId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  wineId        String
+  cellarId      String
+  quantity      Int
+  reason        String?
+  observation   String?
+  wouldBuyAgain Boolean?
+  withdrawnAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  wine          Wine     @relation(fields: [wineId], references: [id], onDelete: Cascade)
+  cellar        Cellar   @relation(fields: [cellarId], references: [id], onDelete: Cascade)
 }
 
 model VivinoData {

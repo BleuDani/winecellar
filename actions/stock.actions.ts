@@ -111,6 +111,10 @@ export async function withdrawStock(stockItemId: string, formData: FormData) {
       return { error: "Invalid quantity" };
     }
     const reason = (formData.get("reason") as string) || null;
+    const observation = (formData.get("observation") as string) || null;
+    const wouldBuyAgainRaw = formData.get("wouldBuyAgain") as string;
+    const wouldBuyAgain =
+      wouldBuyAgainRaw === "yes" ? true : wouldBuyAgainRaw === "no" ? false : null;
     const withdrawnAtRaw = formData.get("withdrawnAt") as string;
     const withdrawnAt = withdrawnAtRaw ? new Date(withdrawnAtRaw) : new Date();
 
@@ -121,6 +125,8 @@ export async function withdrawStock(stockItemId: string, formData: FormData) {
           cellarId: item.cellarId,
           quantity,
           reason,
+          observation,
+          wouldBuyAgain,
           withdrawnAt,
         },
       });
@@ -155,5 +161,25 @@ export async function getWithdrawalsForWine(wineId: string) {
     return { data, error: null };
   } catch {
     return { data: null, error: "Failed to fetch withdrawal history" };
+  }
+}
+
+export async function getWithdrawalsInRange(startDate: string, endDate: string) {
+  const userId = await getUserId();
+  if (!userId) return { data: null, error: "Unauthorized" };
+  try {
+    const gte = new Date(`${startDate}T00:00:00`);
+    const lte = new Date(`${endDate}T23:59:59.999`);
+    const data = await prisma.withdrawal.findMany({
+      where: {
+        withdrawnAt: { gte, lte },
+        wine: { OR: [{ userId }, { userId: "" }] },
+      },
+      include: { wine: true, cellar: true },
+      orderBy: { withdrawnAt: "desc" },
+    });
+    return { data, error: null };
+  } catch {
+    return { data: null, error: "Failed to fetch consumption report" };
   }
 }
